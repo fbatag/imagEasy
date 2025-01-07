@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processando...</title>
+</head>
+
+<body>
+    <h1>Processando...</h1>
+    <b style="float: right; text-align: right;">{{ user_version_info }}</b>
+    <form action="/" method="POST" style="display: inline-block;">
+        <input type="hidden" name="model_name" value="{{ model_name }}">
+        <input type="hidden" name="txt_prompt" value="{{ txt_prompt }}">
+        <input type="hidden" name="activeTab" value="{{ activeTab }}">
+        <input type="hidden" name="choosen_project_code" value="{{ choosen_project_code }}">
+        <input type="hidden" name="txt_prompt_analysis" value="{{ txt_prompt_analysis }}">
+        <input type="hidden" id="clicked_button" name="clicked_button" value="{{target_method}}">
+        <input type="hidden" id="include_file_context" name="include_file_context" value="{{ include_file_context }}">
+        <input type="hidden" id="include_media_file" name="include_media_file" value="{{ include_media_file }}">
+        <input type="hidden" id="lines_chunck_size" name="lines_chunck_size" value="{{ lines_chunck_size }}">
+
+    {% if target_method == "regenerate" %}
+        <p style="color: white; font-weight: bold;">Processando a geração usando o "{{ model_name }}" ... AGUARDE ...</p>
+    {% endif %}
+
+    {% if target_method == "loadContextsBucket" %}
+        <p style="color: white; font-weight: bold;">Lendo os projetos e arquivos de contexto do bucket "{{ bucket }}" do GCS... AGUARDE ....</p>
+    {% endif %}
+
+    {% if target_method == "loadCodeBucketFolders" %}
+        <p style="color: white; font-weight: bold;">Lendo os projetos do bucket "{{ bucket }}" do GCS... AGUARDE ....</p>
+    {% endif %}
+
+    {% if target_method == "get_blobs_to_analyze" or target_method == "analizeCode" %}
+    <p style="color: white; font-weight: bold;">Realizando a análise "{{ txt_prompt_analysis }}" do projeto "{{ choosen_project_code }}", usando o "{{ model_name }}"</p>
+    <p style="color: white; font-weight: bold;">... AGUARDE ....</p>
+    {% endif %}
+
+    {% if target_method == "get_blobs_code" or target_method == "generateCode" %}
+    <p style="color: white; font-weight: bold;">Realizando a geração "{{ txt_prompt_analysis }}" do projeto "{{ choosen_project_code }}", usando o "{{ model_name }}"</p>
+    <p style="color: white; font-weight: bold;">... AGUARDE ....</p>
+    {% endif %}
+
+    {% if target_method == "get_blobs_code_to_long_output" or target_method == "generateCodeLongOutput" %}
+    <p style="color: white; font-weight: bold;">Realizando a geração "{{ txt_prompt_analysis }}" do projeto "{{ choosen_project_code }}", usando o "{{ model_name }}" em chamandas de {{ lines_chunck_size }} linhas por chamada</p>
+    <p style="color: white; font-weight: bold;">... AGUARDE ....</p>
+    {% endif %}
+    
+    {% if target_method == "exclude_code_files" %}
+    <p style="color: white; font-weight: bold;">Excluindo o projeto "{{ choosen_project_code }}" com todo seu conteúdo ... AGUARDE ....</p>
+    {% endif %}
+
+    {% if blob_list|length > 0  %}
+    <br>
+    <p style="color: white; font-weight: bold;">Lista de arquivos que serão analisados. Cada um deles pode levar de poucos segundos a dois minutos para ser processado:</p>
+        {% for blob in blob_list %}
+        <p style="color: white; font-weight: bold;">&nbsp;&nbsp;&nbsp;{{ loop.index }}:&nbsp;&nbsp;{{ blob.name }} - {{ blob.size }} bytes</p>
+        {% endfor %}
+    {% endif %}
+    
+    </form>
+</body>
+
+<script>
+    window.onload = function () {
+        document.querySelector("form").submit();
+    };
+</script>
+
+</html>
