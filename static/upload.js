@@ -1,14 +1,12 @@
-function UploadWithSignedUrl(dest_bucket, project, file, callback) {
+function UploadWithSignedUrl(dest_bucket, dest_folder, file, callback) {
     if (file.size <= 5) 
     {
         callback("Por definição, o arquivo deve conter pelo menos 5 bytes de informação.");
         return;
     }
-    if (project)
-        object_destination = project + "/" + file.name;
-    else
-        object_destination = file.webkitRelativePath;
-    getSignedUrl(dest_bucket, object_destination, file.type, (error, signedUrl) => {
+    if (dest_folder)
+        dest_object = dest_folder + "/" + file.name;
+    getSignedUrl(dest_bucket, dest_object, file.type, (error, signedUrl) => {
         if (error) {
             callback(error);
           } else {
@@ -17,11 +15,11 @@ function UploadWithSignedUrl(dest_bucket, project, file, callback) {
     });
 }
 
-function getSignedUrl(dest_bucket, object_destination, filetype, callback) {
+function getSignedUrl(dest_bucket, dest_object, filetype, callback) {
     const xhr = new XMLHttpRequest();
     const url = `/getSignedUrl?${new URLSearchParams({
         dest_bucket: dest_bucket,
-        object_destination: object_destination,
+        dest_object: dest_object,
         filetype: filetype
     }).toString()}`;
 

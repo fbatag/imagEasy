@@ -10,7 +10,6 @@
 
 <body>
     <form id="index_form" action="/" method="POST" enctype="multipart/form-data">
-        
         <div>
             <label style="color: white; font-weight: bold;" for="model_name">Modelo:</label>&nbsp;&nbsp;
             <select name="model_name">
@@ -23,114 +22,41 @@
         </div>
         <br>
         <input type="hidden" id="activeTab" name="activeTab" value="{{ activeTab }}">
+        <input type="hidden" id="clicked_button" name="clicked_button" value="">
+        <input type="hidden" id="dest_bucket" name="dest_bucket" value="{{ dest_bucket }}">
+        <input type="hidden" id="dest_folder" name="dest_folder" value="{{ dest_folder }}">
         <div class="tabs">
-            <div class="tab" id="tabContextGeneration" data-tab="divContextGeneration">Gerador de conteúdo</div>
-            <div class="tab" id="tabProjectAnalysis" data-tab="divProjectAnalysis">Análise ou geração de projetos</div>
+            <div class="tab" id="tabExamReqLoader" data-tab="divExamReqLoader">Carregar pedido médico</div>
+            <div class="tab" id="tabExamReqManager" data-tab="divExamReqManager">Gerenciar pedido médico</div>
         </div>
 
-        <div class="content" id="divContextGeneration">
-            <h2 style="display: inline-block;">Gerador de conteúdo</h2>
-            <br>
-            <div id="div_general_context" class="form-box">
-                <br>
-                <label for="prompt_sugestions_slc">Sugestões:</label>
-                <select name="prompt_sugestions_slc" id="prompt_sugestions_slc">
-                    {% for prompt_sugestion in prompt_sugestions %}
-                    <option value="{{ prompt_sugestion }}">{{ prompt_sugestion }}</option>
-                    {% endfor %}
-                </select>
-                <br>
-                    <label for="txt_prompt" style="color: black; font-weight: bold;">Pedido ao contexto:</label>
-                <br>
-                <textarea name="txt_prompt" id="txt_prompt">{{ txt_prompt }}</textarea>
-                <br><br>
-                {% if include_file_context == "true" %}
-                <input type="checkbox" id="chk_include_context" name="chk_include_context" value="chk_include_context" checked>
-                {% else %}
-                <input type="checkbox" id="chk_include_context" name="chk_include_context" value="chk_include_context">
-                {% endif %}
-                <label for="chk_include_context" style="color: black; font-weight: bold;">Incluir contexto</label>
-                <br>
-                <div id="div_projects" class="form-box">
-                    {% if projects|length > 0 %}
-                    <label for="projects_slc">Projeto:</label>
-                    <select name="projects_slc" id="projects_slc">
-                        {% for project in projects %}
-                        <option value="{{ project }}">{{ project }}</option>
-                        {% endfor %}
-                    </select>&nbsp;&nbsp;&nbsp;
-                    {% else %}
-                    <p id="load_message" style="font-weight: bold;">
-                        Nenhum projeto encontrado. Clique no botão 'Gerenciar projetos' para adicionar projetos e
-                        contextos.
-                    </p>
-                    {% endif %}
-                    {% if contexts|length > 0 %}
-                    <label for="contexts_slc">Contexto:</label>
-                    <select name="contexts_slc" id="contexts_slc">
-                        {% for context in contexts %}
-                        <option value="{{ context }}">{{ context }}</option>
-                        {% endfor %}
-                    </select>
-                    {% else %}
-                    {% if projects|length > 0 %}
-                    <label id="load_message" style="font-weight: bold;">
-                        Nenhum contexto encontrado. Clique no botão 'Gerenciar projetos' para adicionar projetos e
-                        contextos.
-                    </label>
-                    {% endif %}
-                    {% endif %}
-                    <br><br>
-                    <button type="submit" name="manage_contexts_btn" class="btn-build-style">Gerenciar contextos
-                    </button>&nbsp;&nbsp;&nbsp;
-                    <button type="submit" name="update_contexts_btn" class="btn-build-style">Atualizar contextos
-                    </button>
-                </div>
-                <br><br>
-                <button type="submit" name="load_context_step_btn" class="btn-load-style">Adicionar passo</button>&nbsp;&nbsp;&nbsp;
-                <button type="submit" name="clear_context" id="clear_context" value="Limpar" class="btn-clear-style"
-                    style="display: none;">
-                    <br>
-            </div>
+        <div class="content" id="divExamReqLoader">
+            <h2 style="display: inline-block;">Carregar pedido médico</h2>
             <br><br>
             &nbsp;&nbsp;
-            <button type="submit" name="load_prompts_btn" class="btn-load-style">Carregar
-                estória</button>&nbsp;&nbsp;&nbsp;
-            {% if loaded_prompts|length > 0 %}
-            <button type="submit" name="reset_prompts" class="btn-clear-style">Limpar</button>&nbsp;&nbsp;&nbsp;
-
-            <button type="submit" name="regenerate_btn" class="btn-proceed-style">Gerar</button>&nbsp;&nbsp;&nbsp;
-            <button type="submit" name="view_prompts" class="btn-general-style">Visalizar</button>&nbsp;&nbsp;&nbsp;
-            <button type="submit" name="save_prompts" class="btn-general-style">Salvar</button>
-            {% endif %}
-            <input type="file" id="load_prompts_file" accept=".json" style="display: none;"></input>
-            <input type="hidden" id="choosen_project" name="choosen_project" value="{{ project }}">
-            <input type="hidden" id="prompt_history_json" name="prompt_history_json"></input>
-            <input type="hidden" id="filename_to_save" name="filename_to_save"></input>
-            <input type="hidden" id="clicked_button" name="clicked_button" value="">
-            <input type="hidden" id="step_to_delete" name="step_to_delete" value="">
-            <input type="hidden" id="include_file_context" name="include_file_context" value="{{ include_file_context }}">
-            <input type="hidden" id="include_media_file" name="include_media_file" value="{{ include_media_file }}">
-            {% if loaded_prompts|length > 0 %}
+            <input type="file" id="load_exam_req_file" accept="text/plain,application/pdf,image/jpeg,image/png" style="display: none;"></input>
+            <button type="submit" name="load_exam_btn" class="btn-load-style">Carregar</button>&nbsp;&nbsp;&nbsp;
+            <button type="submit" name="update_exams_btn" class="btn-general-style">Atualizar</button>&nbsp;&nbsp;&nbsp;
+            {% if processsing_exams|length > 0 %}
             <h2>Pedidos e contextos carregados</h2>
             <div id="div_context_steps" class="form-list">
                 <table id="step_lst">
                     <thead>
                         <tr>
-                            <th>Passo</th>
-                            <th>Pedido</th>
-                            <th>Projeto</th>
-                            <th>Contexto</th>
+                            <!--th>#</th>
+                            <th>Id</th-->
+                            <th>Nome</th>
+                            <th>Data</th>
                             <th>Remover</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for prompt, project_name, filename in loaded_prompts %}
+                        {% for exam_name, exam_date in processsing_exams %}
                         <tr>
-                            <td style="text-align: center;">{{ loop.index }}</td>
-                            <td>&nbsp;&nbsp;&nbsp;{{ prompt[:50] }}&nbsp;&nbsp;&nbsp;</td>
-                            <td>&nbsp;&nbsp;&nbsp;{{ project_name }}&nbsp;&nbsp;&nbsp;</td>
-                            <td>&nbsp;&nbsp;&nbsp;{{ filename }}&nbsp;&nbsp;&nbsp;</td>
+                            <!--td style="text-align: center;">{{ loop.index }}</td>
+                            <td>&nbsp;&nbsp;&nbsp;{{ exam_id }}&nbsp;&nbsp;&nbsp;</td-->
+                            <td>&nbsp;&nbsp;&nbsp;{{ exam_name }}&nbsp;&nbsp;&nbsp;</td>
+                            <td>&nbsp;&nbsp;&nbsp;{{ exam_date }}&nbsp;&nbsp;&nbsp;</td>
                             <td style="text-align: center; height: 16px; width: 16px">
                                 <img class="delete-icon" src="static/trash-bin.png"
                                     style="width: 20px; height: 20px; object-fit: cover;" value="{{ loop.index }}">
@@ -143,230 +69,18 @@
             {% endif %}
         </div>
      
-        <div class="content" id="divProjectAnalysis">
-            <input type="hidden" id="choosen_project_code" name="choosen_project_code" value="{{ choosen_project_code }}">
-            <h2 style="display: inline-block;">Análise de código/projeto com GenAI</h2>
-            <div id="div_analysis_code" class="form-box">
-                {% if projects_code|length == 0 %}
-                <p id="load_message_code_generation" style="font-weight: bold;">
-                    Nenhum projeto encontrado. Clique no botão "Atualizar projetos" ou adicione uma pasta com seu codebase,
-                    usando o botão "Adicionar projeto" ou ainda, faço o upload do seu projeto diretamente no bucket:
-                    {{ code_bucket_name }} através da console do GCP!
-                </p>
-                <br>
-                <button type="submit" name="add_code_project_btn" class="btn-build-style">Adicionar projeto</button>
-                &nbsp;&nbsp;&nbsp;
-                <button type="submit" name="update_code_files_btn" class="btn-build-style">Atualizar projetos</button>
-                {% else %}
-                <label for="projects_code_slc">Projeto:</label>
-                <select name="projects_code_slc" id="projects_code_slc">
-                    {% for project_code in projects_code %}
-                    <option value="{{ project_code }}">{{ project_code }}</option>
-                    {% endfor %}
-                </select></select>&nbsp;&nbsp;&nbsp;
-                <button type="submit" name="add_code_project_btn" class="btn-build-style">Adicionar projeto</button>
-                &nbsp;&nbsp;&nbsp;
-                <button type="submit" name="update_code_files_btn" class="btn-build-style">Atualizar projetos</button>
-                &nbsp;&nbsp;&nbsp;
-                <button type="submit" name="exclude_code_files_btn" class="btn-clear-style-int">Excluir o projeto</button>
-                <br><br>
-                <label for="analysis_sugestions_slc">Sugestões:</label>
-                <select name="analysis_sugestions_slc" id="analysis_sugestions_slc">
-                    {% for analysis_sugestion in analysis_sugestions %}
-                    <option value="{{ analysis_sugestion }}">{{ analysis_sugestion }}</option>
-                    {% endfor %}
-                </select>
-                <br>
-                <label for="txt_prompt_analysis" style="color: black; font-weight: bold;">Pedido:</label>
-                <br>
-                <textarea name="txt_prompt_analysis" id="txt_prompt_analysis">{{ txt_prompt_analysis }}</textarea>
-                <br><br>
-                <button type="submit" name="list_code_btn" class="btn-general-style">Listar arquivos</button>&nbsp;&nbsp;&nbsp;
-                <button type="submit" name="analize_code_btn" class="btn-proceed-style">Analisar</button>&nbsp;&nbsp;&nbsp;
-                <button type="submit" name="generate_code_btn" class="btn-proceed-style">Gerar</button>&nbsp;&nbsp;&nbsp;
-                <label for="chk_include_media_file" style="color: black; font-weight: bold;">Incluir media</label>
-                    {% if include_media_file == "true" %}
-                    <input type="checkbox" id="chk_include_media_file" name="chk_include_media_file" value="true" checked>
-                    {% else %}
-                    <input type="checkbox" id="chk_include_media_file" name="chk_include_media_file" value="false">
-                    {% endif %}
-                <br><br>
-                <button type="submit" name="list_long_code_btn" class="btn-general-style">Listar arquivos e nro partes</button>&nbsp;&nbsp;&nbsp;
-                <button type="submit" name="generate_code_long_output_btn" class="btn-proceed-style">Gerar para saídas grandes</button>&nbsp;&nbsp;&nbsp;
-                <input type="number" id="lines_chunck_size" name="lines_chunck_size" value="{{ lines_chunck_size }}" min="1" max="1000">&nbsp;&nbsp;
-                <label for="lines_chunck_size" style="color: black;">Linhas por prompt</label>
-                {% endif %}
-            </div>
-            <br>
-            {% if analysisResult != "" %}
-            <div class="form-list" style="white-space: pre-wrap;">
-                {{ analysisResult }}
-            </div>
-            {% endif %}
-            {% if codeGeneratedFiles|length > 0 %}
-            <button type="submit" name="donwload_zip_generated_files" class="btn-general-style">Baixar Zip </button>
-            {% endif %}
-            {% for file, response in codeGeneratedFiles %}  
-            <p style="font-weight: bold; color: white;">{{ file }}</p>
-            <div class="form-list" style="white-space: pre-wrap;">
-                {{ response }}
-            </div>
-            {% endfor %}
+        <div class="content" id="divExamReqManager">
+
         </div>
     </form>
 
     <div id="loading_message_area" class="form-list" style="white-space: pre-wrap;">
 
     </div>
+
     <script src="{{ url_for('static', filename='upload.js') }}"></script>
     <script>
         const form = document.querySelector("form");
-        
-        const loading_message_area = document.getElementById("loading_message_area");
-        loading_message_area.style.display = "none";
-        const codeProjectFolderSelect = document.createElement('input');
-        codeProjectFolderSelect.style.display = "none";
-        codeProjectFolderSelect.type = 'file';
-        codeProjectFolderSelect.webkitdirectory = true; 
-        codeProjectFolderSelect.directory = true;
-        
-        codeProjectFolderSelect.addEventListener("change", function () {
-            if (codeProjectFolderSelect.files.length > 0) {
-                form.style.display = "none";
-                loading_message_area.style.display = "block";
-                for (let i = 0; i < codeProjectFolderSelect.files.length; i++) {
-                    if (should_upload_this_file(codeProjectFolderSelect.files[i]) == false){
-                        console.log("O arquivo a seguir não será carregado devido as regras: " + codeProjectFolderSelect.files[i].webkitRelativePath);
-                        continue;
-                    }
-                    const msgFile = document.createElement("p");
-                    msgFile.textContent = "Carregando: " + codeProjectFolderSelect.files[i].webkitRelativePath;
-                    console.log(msgFile.textContent);
-                    loading_message_area.appendChild(msgFile);
-                    UploadWithSignedUrl("code", null, codeProjectFolderSelect.files[i], (error) => {
-                        if (error) {
-                            console.log(error);
-                            alert(error);
-                        } else {
-                            console.log(codeProjectFolderSelect.files[i].webkitRelativePath + " -> loaded!");
-                        }
-                        loading_message_area.removeChild(msgFile);
-                        if (loading_message_area.children.length == 0) // acabou de carregar
-                        {
-                            clicked_button.value = "update_code_files_btn";
-                            form.submit();
-                        }
-                    });
-                }
-            } else {
-                console.log("Nenhuma pasta selecionada.");
-            }
-        });
-
-        const allowed_file_types = ["html", "py", "java", "js", "ts", "cs", "c", "cpp", "go", "rb", "php", "kt", "rs", "scala", "pl", "dart", "swift", "clj", "erl", "m",
-        "md", "txt", "pdf", "jpeg", "jpg", "png", "webp", "mp4", "mpeg","mov","avi","x-flv","mpg","webm", "wmv","3gpp", "json", "yaml", "yml", "sh", "css"];
-        const skipped_filepahts = [".DS_Store" , ".__pycache__" ,".git"]
-        function should_upload_this_file(file)
-        {
-            if (file.size <= 5) return false; // why 5 ? it cloiud be 0, but just excluding very small content
-            const filepath = file.webkitRelativePath;
-            const fileExtension = filepath.split('.').pop();
-            if (allowed_file_types.includes(fileExtension)) {
-                skipped_filepahts.forEach(function(pathStr) {
-                    if (filepath.includes(pathStr)) 
-                        return false;
-                });
-                return true;
-            } 
-            return false;
-        }
-
-        function containsAny(str, substrings) {
-            for (let i = 0; i < substrings.length; i++) {
-                if (str.includes(substrings[i])) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        const prompt_sugestions_slc = document.getElementById("prompt_sugestions_slc");
-        const txt_prompt = document.getElementById("txt_prompt");
-
-        prompt_sugestions_slc.addEventListener("change", function () {
-                txt_prompt.value = prompt_sugestions_slc.value;
-            });
-
-        const clicked_button = document.getElementById("clicked_button");
-        const choosen_project = document.getElementById("choosen_project");
-        const include_file_context = document.getElementById("include_file_context");
-        const div_projects = document.getElementById("div_projects");
-        // projects_slc doesn't exist if there are no projects
-        const chk_include_context = document.getElementById("chk_include_context");
-        function chk_include_context_changed() {
-            if (chk_include_context.checked) {
-                div_projects.style.display = "block";
-                include_file_context.value = "true";
-            }
-            else{
-                div_projects.style.display = "none";
-                include_file_context.value = "false";
-            }
-        }
-        chk_include_context_changed();
-        chk_include_context.addEventListener("change", chk_include_context_changed);
-
-        const chk_include_media_file = document.getElementById("chk_include_media_file");
-        if (chk_include_media_file != null){
-            const include_media_file = document.getElementById("include_media_file");
-            function chk_include_media_file_changed() {
-                if (chk_include_media_file.checked) {
-                    include_media_file.value = "true";
-                }
-                else{
-                    include_media_file.value = "false";
-                }
-            }
-            chk_include_media_file_changed();
-            chk_include_media_file.addEventListener("change", chk_include_media_file_changed);
-        }
-
-        const projects_slc = document.getElementById("projects_slc");
-        if (projects_slc != null) {
-            projects_slc.value = choosen_project.value;
-            projects_slc.addEventListener("change", function () {
-                if (choosen_project.value == this.value) return;
-                choosen_project.value = this.value;
-                clicked_button.value = "projects_slc";
-                form.submit();
-            });
-        }
-
-        const choosen_project_code = document.getElementById("choosen_project_code");
-        const projects_code_slc = document.getElementById("projects_code_slc");
-        if (projects_code_slc != null && choosen_project_code.value != "") {
-            projects_code_slc.value = choosen_project_code.value;
-            projects_code_slc.addEventListener("change", function () {
-                if (choosen_project_code.value == this.value) return;
-                choosen_project_code.value = this.value;
-            });
-        }
-        
-        const step_lst = document.getElementById("step_lst");
-        if (step_lst != null) {
-            step_lst.addEventListener("click", function (event) {
-                console.log(event.target);
-                if (event.target.classList.contains("delete-icon")) {
-                    const step_num = event.target.getAttribute("value");
-                    console.log(step_num);
-                    response = confirm("Tem certeza que deseja deletar o passo \"" + step_num + "\"?");
-                    if (!response) return;
-                    clicked_button.value = "delete_step_btn";
-                    document.getElementById("step_to_delete").value = step_num;
-                    form.submit();
-                }
-            });
-        }
 
         var choosenModel = document.getElementById("choosen_model_name");
         if (choosenModel != null && choosenModel.value != "") {
@@ -378,67 +92,6 @@
                     break;
                 }
             }
-        }
-        const load_prompts_file = document.getElementById("load_prompts_file");
-        load_prompts_file.addEventListener("change", function () {
-            if (this.files.length > 0) {
-                const file = this.files[0];
-                console.log("CHOOSEN " + clicked_button.value + " FILE: " + file.name + " type: " + file.type);
-                const reader = new FileReader();
-                reader.onload = function () {
-                    document.getElementById("prompt_history_json").value = reader.result;
-                    form.submit();
-                };
-                reader.readAsText(file);
-            }
-        });
-
-        // Adiciona um ouvinte de evento ao formulário
-        form.addEventListener("submit", function (event) {
-            // Evita que o formulário seja enviado
-            event.preventDefault();
-            // Obtém o botão que foi pressionado
-            clicked_button.value = event.submitter.name;
-            console.log("CLICKED BTN: " + clicked_button.value);
-            if (clicked_button.value == "load_context_step_btn") {
-                if (txt_prompt.value.trim() == "") {
-                    alert("Forneça um pedido ao contexto!");
-                    return;
-                }
-            }
-            else if (clicked_button.value == "analize_code_btn" || clicked_button.value == "generate_code_btn" || clicked_button.value == "generate_code_long_output_btn") {
-                if (txt_prompt_analysis.value.trim() == "") {
-                    alert("Forneça um pedido (prompt) para análise/geração!");
-                    return;
-                }
-            }
-            else if (clicked_button.value == "load_prompts_btn") {
-                load_prompts_file.click();
-                return;
-            }
-            //else if (clicked_button.value == "save_prompts" || clicked_button.value == "donwload_zip_generated_files") {
-            else if (clicked_button.value == "save_prompts") {
-                const filename = prompt("Digite o caminho do arquivo:");
-                if (!filename) return;
-                if (filename.trim() == "") {
-                    alert("Entre um nome de arquivo válido!");
-                    return;
-                }
-                document.getElementById("filename_to_save").value = filename.trim();
-            }
-            else if (clicked_button.value == "add_code_project_btn") {
-                codeProjectFolderSelect.click();
-                return;
-            }
-            this.submit();
-        });
-
-        const txt_prompt_analysis = document.getElementById("txt_prompt_analysis");
-        if (txt_prompt_analysis != null) {
-            const analysis_sugestions_slc = document.getElementById("analysis_sugestions_slc");
-            analysis_sugestions_slc.addEventListener("change", function () {
-                txt_prompt_analysis.value = analysis_sugestions_slc.value;
-            });        
         }
 
         // selecionar o tab ativo
@@ -461,69 +114,71 @@
                 activeTab.value = this.id;
             });
         });
-
-        // select the tab
-        console.log(activeTab.value);
         document.getElementById(activeTab.value).click();
 
-        /*if (document.getElementById("activeTab").id == "tabCodeGeneration")
-        { não funcionou
-            clicked_button.value = "update_code_files_btn";
-            form.submit();
-        }*/
+        const clicked_button = document.getElementById("clicked_button");
+
+        const load_exam_req_file = document.getElementById("load_exam_req_file");
+        load_exam_req_file.addEventListener("change", function () {
+            if (this.files.length > 0) {
+                console.log(load_exam_req_file.files[0]);
+                clicked_button.value = "load_exam_btn";
+                ShowLoadingMessage("Carregando o exame \"" + this.files[0].name + "\".  AGUARDE ... ");
+                dest_bucket = document.getElementById("dest_bucket").value;
+                dest_folder = document.getElementById("dest_folder").value;
+                UploadWithSignedUrl(dest_bucket, dest_folder, this.files[0], (error, response) => {
+                    if (error)
+                        alert(error);
+                    fileElem = document.getElementById('load_exam_req_file');
+                    if (fileElem != null) {
+                        //alert('** REMOVENDO ** fileElem')
+                        fileElem.remove();
+                    }
+                    form.submit();
+                });
+            }
+        });
+        
+        const loading_message_area = document.getElementById('loading_message_area');
+        loading_message_area.style.display = "none";
+        function ShowLoadingMessage(message) {
+            loading_message_area.textContent = message;
+            loading_message_area.style.display = "block";
+            form.style.display = "none";
+        }
+
+        // Adiciona um ouvinte de evento ao formulário
+        form.addEventListener("submit", function (event) {
+            // Evita que o formulário seja enviado
+            event.preventDefault();
+            // Obtém o botão que foi pressionado
+            clicked_button.value = event.submitter.name;
+            console.log("CLICKED BTN: " + clicked_button.value);
+            if (clicked_button.value == "load_exam_btn") {
+                load_exam_req_file.click();
+                return;
+            }
+            //this.submit();
+        });
+
+
+        const step_lst = document.getElementById("step_lst");
+        if (step_lst != null) {
+            step_lst.addEventListener("click", function (event) {
+                console.log(event.target);
+                if (event.target.classList.contains("delete-icon")) {
+                    const step_num = event.target.getAttribute("value");
+                    console.log(step_num);
+                    response = confirm("Tem certeza que deseja deletar o passo \"" + step_num + "\"?");
+                    if (!response) return;
+                    clicked_button.value = "delete_step_btn";
+                    document.getElementById("step_to_delete").value = step_num;
+                    form.submit();
+                }
+            });
+        }
 
     </script>
 </body>
-
-
-{% if any_error == "show_error_is_empty" %}
-<script>
-    alert("Por favor, digite um pedido e/ou selecione um arquivo!");
-</script>
-{% endif %}
-
-{% if any_error == "show_error_mixed_contexts" %}
-<script>
-    alert("Contexto textual e midia não podem ser misturados!\nEscolha somente um deles de cada vez");
-</script>
-{% endif %}
-
-{% if any_error == "show_error_repeated" %}
-<script>
-    alert("Pedido e arquivo já carregados. Entre novo pedido ou arquivo!");
-</script>
-{% endif %}
-
-{% if any_error == "show_error_no_prompts" %}
-<script>
-    alert("Não há pedidos a processar!");
-</script>
-{% endif %}
-
-{% if any_error == "show_error_no_prompts_to_save" %}
-<script>
-    alert("Não há pedidos a salvar!");
-</script>
-{% endif %}
-
-{% if any_error == "show_error_no_gcs_file" %}
-<script>
-    alert("Nenhuma midia encontrada nos buckets gcs!");
-</script>
-{% endif %}
-
-{% if any_error == "show_error_json_parser" %}
-<script>
-    alert("Erro ao parsear o json. Confirme o formato!");
-</script>
-{% endif %}
-
-
-{% if any_error == "blob_file_upload_fail" %}
-<script>
-    alert("Erro ao subir o arquivo para o GCS!");
-</script>
-{% endif %}
-
 
 </html>

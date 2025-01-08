@@ -1,9 +1,10 @@
 export PROJECT_ID=$(gcloud config get project)
 echo $PROJECT_ID
 export REGION=southamerica-east1
+export APP_NAME=imag-easy
 export SUPPORT_EMAIL=dev@fbatagin.altostrat.com
 export USER_GROUP=gcp-devops@fbatagin.altostrat.com
-export DEPLOY_GROUP=gcp-devops@fbatagin.altostrat.com
+
 
 
 gcloud services enable iam.googleapis.com
@@ -14,56 +15,45 @@ gcloud services enable iap.googleapis.com
 gcloud services enable run.googleapis.com
 #gcloud services enable vision.googleapis.com # para covnersão de pdf em texto - não usado atualmente
 
-gsutil mb -b on -l $REGION gs://uploaded-$PROJECT_ID
-gsutil lifecycle set bucket_lifecycle.json gs://uploaded-$PROJECT_ID
-gcloud storage buckets update gs://uploaded-$PROJECT_ID --cors-file=bucket-cors.json
-gcloud storage buckets describe gs://uploaded-$PROJECT_ID --format="default(cors_config)" # Verirficar se acatou
+export UPLOAD_BUCKET=$APP_NAME-upload-$PROJECT_ID
+gsutil mb -b on -l $REGION gs://$UPLOAD_BUCKET
+#gsutil lifecycle set bucket_lifecycle.json gs://$UPLOAD_BUCKET
+gcloud storage buckets update gs://$UPLOAD_BUCKET --cors-file=bucket-cors.json
+gcloud storage buckets describe gs://$UPLOAD_BUCKET --format="default(cors_config)" # Verificar se acatou
 
-gsutil mb -b on -l $REGION gs://gen-ai-app-code-$PROJECT_ID
-gsutil lifecycle set bucket_lifecycle.json gs://gen-ai-app-code-$PROJECT_ID
-gcloud storage buckets update gs://gen-ai-app-code-$PROJECT_ID --cors-file=bucket-cors.json
-gcloud storage buckets describe gs://gen-ai-app-code-$PROJECT_ID --format="default(cors_config)" # Verirficar se acatou
+export PROCESSED_BUCKET=$APP_NAME-processed-$PROJECT_ID
+gsutil mb -b on -l $REGION gs://$UPLOAD_BUCKET
+#gsutil lifecycle set bucket_lifecycle.json gs://$PROCESSED_BUCKET
+gcloud storage buckets update gs://$PROCESSED_BUCKET --cors-file=bucket-cors.json
+gcloud storage buckets describe gs://$PROCESSED_BUCKET --format="default(cors_config)" # Verificar se acatou
 
-gcloud iam service-accounts create gemini-app-sa \
---display-name "Gemini App Generator Service Account" \
+export SERVICE_ACCOUNT=APP_NAME-sa
+gcloud iam service-accounts create $SERVICE_ACCOUNT \
+--display-name "ImagEasy Service Account" \
 --project $PROJECT_ID
 
+gcloud storage buckets add-iam-policy-binding gs://$UPLOAD_BUCKET \
+--member=serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com \
+--role=roles/storage.objectUser --project=$PROJECT_ID
+
+gcloud storage buckets add-iam-policy-binding gs://$PROCESSED_BUCKET \
+--member=serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com \
+--role=roles/storage.objectUser --project=$PROJECT_ID
+
 gcloud projects add-iam-policy-binding $PROJECT_ID \
---member serviceAccount:gemini-app-sa@$PROJECT_ID.iam.gserviceaccount.com \
+--member serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com \
 --role roles/aiplatform.user
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
---member serviceAccount:gemini-app-sa@$PROJECT_ID.iam.gserviceaccount.com \
---role roles/iam.serviceAccountTokenCreator
-
-gcloud storage buckets add-iam-policy-binding gs://uploaded-$PROJECT_ID \
---member=serviceAccount:gemini-app-sa@$PROJECT_ID.iam.gserviceaccount.com \
---role=roles/storage.objectUser --project=$PROJECT_ID
-
-gcloud storage buckets add-iam-policy-binding gs://gen-ai-app-code-$PROJECT_ID \
---member=serviceAccount:gemini-app-sa@$PROJECT_ID.iam.gserviceaccount.com \
---role=roles/storage.objectUser --project=$PROJECT_ID
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
---member serviceAccount:gemini-app-sa@$PROJECT_ID.iam.gserviceaccount.com \
+--member serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com \
 --role roles/serviceusage.serviceUsageConsumer
 
-### Permissão nos buckets - não tem a ver com o redeploy e sim com subir os projetos
-gcloud storage buckets add-iam-policy-binding gs://uploaded-$PROJECT_ID \
-   --member=group:$DEPLOY_GROUP --role=roles/storage.objectUser --project=$PROJECT_ID
-
-gcloud storage buckets add-iam-policy-binding gs://gen-ai-app-code-$PROJECT_ID \
-   --member=group:$DEPLOY_GROUP --role=roles/storage.objectUser --project=$PROJECT_ID
-
 #deploy em Cloud Run (não é necessário yaml)
-export SERVICE_NAME=gemini-app-ui
-export PROJECT_ID=$(gcloud config get project)
-export REGION=southamerica-east1
+export SERVICE_NAME=$APP_NAME-ui
 gcloud config set run/region $REGION
 gcloud run deploy $SERVICE_NAME --region=$REGION --source . --memory=4Gi --cpu=2 --min-instances=1 --max-instances=1 --concurrency=100 --timeout=60m \
    --project=$PROJECT_ID --ingress=internal-and-cloud-load-balancing --no-allow-unauthenticated  --cpu-throttling --quiet \
-   
-   
+    
 # deploys seguintes (omitir o service account)
 # --cpu-throttling (CPU not allways allocated) and -no-allow-unauthenticated are default
 
@@ -101,8 +91,8 @@ gcloud beta services identity create --service=iap.googleapis.com --project=$PRO
 gcloud run services add-iam-policy-binding $SERVICE_NAME --member=serviceAccount:service-$PROJECT_NUMBER@gcp-sa-iap.iam.gserviceaccount.com  \
 --role='roles/run.invoker' --region $REGION
 
-gcloud iap oauth-brands create --application_title=GeminiApp --support_email=$SUPPORT_EMAIL
-gcloud iap oauth-clients create BRAND --display_name=GeminiApp
+gcloud iap oauth-brands create --application_title=$APP_NAME --support_email=$SUPPORT_EMAIL
+gcloud iap oauth-clients create BRAND --display_name=$APP_NAME
 gcloud iap web enable --resource-type=backend-services --service=$SERVICE_NAME-backend
     
 # Usuário da aplicação = permissão no IAP    
