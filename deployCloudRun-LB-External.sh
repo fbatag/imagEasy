@@ -14,18 +14,20 @@ gcloud services enable run.googleapis.com
 #gcloud services enable vision.googleapis.com # para covnersão de pdf em texto - não usado atualmente
 
 export UPLOAD_BUCKET=$APP_NAME-upload-$PROJECT_ID
-gsutil mb -b on -l $REGION gs://$UPLOAD_BUCKET
-#gsutil lifecycle set bucket_lifecycle.json gs://$UPLOAD_BUCKET
+gcloud storage buckets create $UPLOAD_BUCKET --location=$REGION
+#gcloud storage buckets update gs://UPLOAD_BUCKET --lifecycle-file=bucket_lifecycle.json
 gcloud storage buckets update gs://$UPLOAD_BUCKET --cors-file=bucket-cors.json
 gcloud storage buckets describe gs://$UPLOAD_BUCKET --format="default(cors_config)" # Verificar se acatou
 
 export PROCESSED_BUCKET=$APP_NAME-processed-$PROJECT_ID
-gsutil mb -b on -l $REGION gs://$UPLOAD_BUCKET
-#gsutil lifecycle set bucket_lifecycle.json gs://$PROCESSED_BUCKET
+gcloud storage buckets create $PROCESSED_BUCKET --location=$REGION
+#gcloud storage buckets update gs://PROCESSED_BUCKET --lifecycle-file=bucket_lifecycle.json
 gcloud storage buckets update gs://$PROCESSED_BUCKET --cors-file=bucket-cors.json
 gcloud storage buckets describe gs://$PROCESSED_BUCKET --format="default(cors_config)" # Verificar se acatou
 
-export SERVICE_ACCOUNT=APP_NAME-sa
+gcloud storage buckets notifications create gs://$UPLOAD_BUCKET --topic=$PROJECT_ID/topics/$APP_NAME-upload-topic --event-types=OBJECT_FINALIZE 
+
+export SERVICE_ACCOUNT=$APP_NAME-sa
 gcloud iam service-accounts create $SERVICE_ACCOUNT \
 --display-name "ImagEasy Service Account" \
 --project $PROJECT_ID
@@ -40,6 +42,10 @@ gcloud storage buckets add-iam-policy-binding gs://$PROCESSED_BUCKET \
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
 --member serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com \
+--role roles/eventarc.eventReceiver
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+--member serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com \
 --role roles/aiplatform.user
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
@@ -49,7 +55,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 #deploy em Cloud Run (não é necessário yaml)
 export SERVICE_NAME=$APP_NAME-ui
 gcloud config set run/region $REGION
-gcloud run deploy $SERVICE_NAME --region=$REGION --source . --memory=4Gi --cpu=2 --min-instances=1 --max-instances=1 --concurrency=100 --timeout=60m \
+gcloud run deploy $SERVICE_NAME --region=$REGION --source ./UI --min-instances=1 --timeout=60m \
    --project=$PROJECT_ID --ingress=internal-and-cloud-load-balancing --no-allow-unauthenticated  --cpu-throttling --quiet \
     
 # deploys seguintes (omitir o service account)
@@ -59,7 +65,7 @@ gcloud run deploy $SERVICE_NAME --region=$REGION --source . --memory=4Gi --cpu=2
 gcloud compute network-endpoint-groups create $SERVICE_NAME-serverless-neg --region=$REGION \
        --network-endpoint-type=serverless --cloud-run-service=$SERVICE_NAME
 
-# LOAD BALANCER - EXTERNO - # LOAD BALANCER - INTERNO (PEDIDO DASA - se acessível somente na rede interna)
+# LOAD BALANCER - EXTERNO
 gcloud compute addresses create $SERVICE_NAME-glb-ip --network-tier=PREMIUM --ip-version=IPV4 --global
 export LB_IP_NUMBER=$(gcloud compute addresses describe $SERVICE_NAME-glb-ip --format="get(address)" --global)
 echo $LB_IP_NUMBER

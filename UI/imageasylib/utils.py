@@ -1,45 +1,10 @@
 import datetime
 from flask import request
-from vertexai.generative_models import GenerativeModel
-import vertexai.preview.generative_models as generative_models
 from google import auth
 from google.oauth2 import service_account
 from google.cloud import storage
 
 storage_client = storage.Client()
-
-generation_config_flash = {
-    "max_output_tokens": 8192,
-    "temperature": 0.5,
-    "top_p": 0.95,
-}
-
-generation_config_pro = {
-    "max_output_tokens": 8192, # o modelo responde 32768, mas tanto a doc quanto a execução não aceita esse valor
-    "temperature": 0.5,
-    "top_p": 0.95,
-}
-safety_settings = {
-    generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_ONLY_HIGH,
-    generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_ONLY_HIGH,
-    generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_ONLY_HIGH,
-    generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_ONLY_HIGH,
-}
-
-# ATENÇÃO: Os parãmetros abaixo somente funcionam com prompt texto. Se um arquivo é incluido, dai erro "400 Request contains an invalid argument." 
-#safety_settings_none = {
- #   #generative_models.HarmCategory.HARM_CATEGORY_UNSPECIFIED: HarmBlockThreshold.BLOCK_NONE,
- #   generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_NONE,
- #   generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_NONE,
- #   generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_NONE,
- #   generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_NONE,
-#}
-def getGenerativeModel(model_name):
-    if model_name == "gemini-1.5-flash-002":
-        generation_config = generation_config_flash
-    else:
-        generation_config = generation_config_pro
-    return GenerativeModel(model_name, generation_config=generation_config, safety_settings=safety_settings)
 
 def get_project_Id():
     return storage_client.project
@@ -72,7 +37,7 @@ def getSignedUrlParam(dest_bucket_name, dest_object, filetype):
     if request.url_root == 'http://127.0.0.1:5000/':
         print("RUNNING LOCAL")
         signeUrl = blob.generate_signed_url(method='PUT', version="v4", expiration=expiration, content_type=filetype, 
-                                    credentials=service_account.Credentials.from_service_account_file("../sa.json"),
+                                    credentials=service_account.Credentials.from_service_account_file("../../imgEasysa.json"),
                                     headers={"X-Goog-Content-Length-Range": "1,5000000000", 'Content-Type': filetype})
     else:
         print("CREDENTIALS")

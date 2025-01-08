@@ -1,0 +1,5 @@
+Werkzeug
+gunicorn
+Flask
+google-cloud-storage
+

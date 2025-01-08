@@ -1,4 +1,4 @@
-import  os, vertexai
+import  os
 from flask import Flask, request, render_template
 from imageasylib.utils import get_project_Id, get_iap_user, get_user_folder, get_user_files, getSignedUrlParam
 
@@ -6,7 +6,6 @@ UPLOAD_BUCKET_NAME = os.environ.get("UPLOAD_BUCKET_NAME", "imag-easy-upload-") +
 
 print("(RE)LOADING APPLICATION")
 app = Flask(__name__)
-vertexai.init()
 
 def get_user_version_info():
     return "User: " + get_iap_user() + " -  Version: 1.0.0"
@@ -26,7 +25,7 @@ def index():
     print("METHOD: index -> " + request.method)
     clicked_button = request.form.get('clicked_button', "NOT_FOUND")
     print("clicked_button: ", clicked_button)
-    #if clicked_button == "load_exam_btn": 
+    #if clicked_button == "update_exams_btn": 
     #    return proceed("load_exam")
     #elif clicked_button == "load_exam":
     return renderIndex()

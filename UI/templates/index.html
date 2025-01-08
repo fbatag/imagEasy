@@ -43,24 +43,15 @@
                 <table id="step_lst">
                     <thead>
                         <tr>
-                            <!--th>#</th>
-                            <th>Id</th-->
                             <th>Nome</th>
                             <th>Data</th>
-                            <th>Remover</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for exam_name, exam_date in processsing_exams %}
                         <tr>
-                            <!--td style="text-align: center;">{{ loop.index }}</td>
-                            <td>&nbsp;&nbsp;&nbsp;{{ exam_id }}&nbsp;&nbsp;&nbsp;</td-->
                             <td>&nbsp;&nbsp;&nbsp;{{ exam_name }}&nbsp;&nbsp;&nbsp;</td>
                             <td>&nbsp;&nbsp;&nbsp;{{ exam_date }}&nbsp;&nbsp;&nbsp;</td>
-                            <td style="text-align: center; height: 16px; width: 16px">
-                                <img class="delete-icon" src="static/trash-bin.png"
-                                    style="width: 20px; height: 20px; object-fit: cover;" value="{{ loop.index }}">
-                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -158,25 +149,11 @@
                 load_exam_req_file.click();
                 return;
             }
-            //this.submit();
+            else if (clicked_button.value == "update_exams_btn") { 
+                ShowLoadingMessage("Atualizando os exames em processamento.  AGUARDE ... ");
+            }
+            this.submit();
         });
-
-
-        const step_lst = document.getElementById("step_lst");
-        if (step_lst != null) {
-            step_lst.addEventListener("click", function (event) {
-                console.log(event.target);
-                if (event.target.classList.contains("delete-icon")) {
-                    const step_num = event.target.getAttribute("value");
-                    console.log(step_num);
-                    response = confirm("Tem certeza que deseja deletar o passo \"" + step_num + "\"?");
-                    if (!response) return;
-                    clicked_button.value = "delete_step_btn";
-                    document.getElementById("step_to_delete").value = step_num;
-                    form.submit();
-                }
-            });
-        }
 
     </script>
 </body>
