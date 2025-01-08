@@ -5,8 +5,6 @@ export APP_NAME=imag-easy
 export SUPPORT_EMAIL=dev@fbatagin.altostrat.com
 export USER_GROUP=gcp-devops@fbatagin.altostrat.com
 
-
-
 gcloud services enable iam.googleapis.com
 gcloud services enable storage-component.googleapis.com
 gcloud services enable aiplatform.googleapis.com
