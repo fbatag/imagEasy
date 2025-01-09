@@ -1,11 +1,13 @@
 import  os
+import datetime
 from flask import Flask, request, render_template
 from imageasylib.utils import get_project_Id, get_iap_user, get_user_folder, get_user_files, getSignedUrlParam
 
-UPLOAD_BUCKET_NAME = os.environ.get("UPLOAD_BUCKET_NAME", "imag-easy-upload-") + get_project_Id()
+UPLOAD_BUCKET_NAME = os.environ.get("UPLOAD_BUCKET_NAME", "imageasy-upload-") + get_project_Id()
 
 print("(RE)LOADING APPLICATION")
 app = Flask(__name__)
+timezone = None
 
 def get_user_version_info():
     return "User: " + get_iap_user() + " -  Version: 1.0.0"
@@ -23,6 +25,8 @@ def getSignedUrl():
 @app.route("/", methods=["GET", "POST"])
 def index():
     print("METHOD: index -> " + request.method)
+    if timezone == None:
+        return set_timezone()
     clicked_button = request.form.get('clicked_button', "NOT_FOUND")
     print("clicked_button: ", clicked_button)
     #if clicked_button == "update_exams_btn": 
@@ -49,13 +53,23 @@ def loadUserProcessingExams():
     processsing_exams_blobs = get_user_files(UPLOAD_BUCKET_NAME)
     processsing_exams = []
     for blob in processsing_exams_blobs:
-        processsing_exams.append((blob.name, blob.time_created))
+        parts = blob.name.split('/')
+        print("METHOD: CHECK_timezone: " + str(timezone))
+        createDatetime = blob.time_created - datetime.timedelta(minutes=timezone)
+        processsing_exams.append((createDatetime.strftime("%Y-%m-%d %H:%M:%S"), parts[-1]))
     return processsing_exams
 
+
+#@app.route('/set_timezone', methods=['GET'])
+def set_timezone():
+    timezoneOffset = request.form.get('timezoneOffset', "NOT_FOUND")
+    if timezoneOffset == "NOT_FOUND":
+        return render_template("init.html")
+    print("METHOD: set_timezone: " + timezoneOffset)
+    global timezone
+    timezone = int(timezoneOffset)
+    return renderIndex()
 
 if __name__ == "__main__":
     app.run(debug=True)
 
-#considerar o uso:
-# https://ai.google.dev/gemini-api/docs/prompting_with_media?lang=python
-# https://developers.google.com/drive/api/guides/ref-export-formats

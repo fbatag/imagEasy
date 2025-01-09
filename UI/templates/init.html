@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <form id="index_form" action="/" method="POST" enctype="multipart/form-data">
+        <input type="hidden" id="timezoneOffset" name="timezoneOffset" >
+
+    </form>
+
+<script>
+    const timezoneOffset = document.getElementById("timezoneOffset");
+    const form = document.querySelector("form");
+    // PEGAR TIMEZONE DO BROWSER -  isso me dá o nome. Quero o valor de horas
+    //const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    //console.log("TIMEZONE: " + timezone);
+    timezoneOffset.value = new Date().getTimezoneOffset(); 
+    form.submit();
+    /*    const xhr = new XMLHttpRequest();
+    xhr.open("GET", '/set_timezone?timezone='+ offsetInHours, true);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            console.log("Timezone obtido com sucesso.");
+        } else {
+            console.log(xhr.status + " : Erro ao tentar obter o timezone do browser. Resposta: " + xhr.responseText);
+        }
+        this.submit();
+    };
+    xhr.onerror = function (event) {
+        console.log(xhr.status + " : Erro ao tentar obter o timezone do browser. Resposta: " + xhr.responseText);
+        this.submit();
+    };
+    xhr.send(); */
+</script>
+
+</body>
+
+</html>

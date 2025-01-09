@@ -28,7 +28,6 @@ def get_user_files(bucket_name):
     return bucket.list_blobs(prefix=get_user_folder())
 
 def getSignedUrlParam(dest_bucket_name, dest_object, filetype):
-    credentials, project_id = auth.default()
     dest_bucket = storage_client.bucket(dest_bucket_name)
     blob = dest_bucket.blob(dest_object)
     expiration=datetime.timedelta(minutes=15)
@@ -37,19 +36,20 @@ def getSignedUrlParam(dest_bucket_name, dest_object, filetype):
     if request.url_root == 'http://127.0.0.1:5000/':
         print("RUNNING LOCAL")
         signeUrl = blob.generate_signed_url(method='PUT', version="v4", expiration=expiration, content_type=filetype, 
-                                    credentials=service_account.Credentials.from_service_account_file("../../imgEasysa.json"),
+                                    credentials=service_account.Credentials.from_service_account_file("../../imageasysa.json"),
                                     headers={"X-Goog-Content-Length-Range": "1,5000000000", 'Content-Type': filetype})
     else:
         print("CREDENTIALS")
-        print(credentials.service_account_email)
+        credentials, project_id = auth.default()
         #if credentials.token is None:
         credentials.refresh(auth.transport.requests.Request())
-        print(credentials.token)
+        print("Using service account")
+        print(credentials.service_account_email)
         signeUrl = blob.generate_signed_url(method='PUT', version="v4", expiration=expiration, content_type=filetype, 
                                     service_account_email=credentials.service_account_email, access_token=credentials.token,
                                     headers={"X-Goog-Content-Length-Range": "1,5000000000", 'Content-Type': filetype})
         #except Exception as e:
         #    print(e)
-    #print(signeUrl)
+    print(signeUrl)
     return signeUrl
 

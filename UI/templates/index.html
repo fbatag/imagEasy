@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prompt Gen</title>
+    <title>ImagEasy</title>
 </head>
 
 <body>
@@ -38,20 +38,20 @@
             <button type="submit" name="load_exam_btn" class="btn-load-style">Carregar</button>&nbsp;&nbsp;&nbsp;
             <button type="submit" name="update_exams_btn" class="btn-general-style">Atualizar</button>&nbsp;&nbsp;&nbsp;
             {% if processsing_exams|length > 0 %}
-            <h2>Pedidos e contextos carregados</h2>
+            <h2>Pedidos carregados e em processamento</h2>
             <div id="div_context_steps" class="form-list">
                 <table id="step_lst">
                     <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th>Data</th>
+                            <th>Data hora</th>
+                            <th>Pedido</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for exam_name, exam_date in processsing_exams %}
+                        {% for exam_date, exam_name  in processsing_exams %}
                         <tr>
-                            <td>&nbsp;&nbsp;&nbsp;{{ exam_name }}&nbsp;&nbsp;&nbsp;</td>
                             <td>&nbsp;&nbsp;&nbsp;{{ exam_date }}&nbsp;&nbsp;&nbsp;</td>
+                            <td>&nbsp;&nbsp;&nbsp;{{ exam_name }}&nbsp;&nbsp;&nbsp;</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -154,7 +154,6 @@
             }
             this.submit();
         });
-
     </script>
 </body>
 
