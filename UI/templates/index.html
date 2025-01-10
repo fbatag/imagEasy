@@ -25,22 +25,20 @@
         <input type="hidden" id="clicked_button" name="clicked_button" value="">
         <input type="hidden" id="dest_bucket" name="dest_bucket" value="{{ dest_bucket }}">
         <input type="hidden" id="dest_folder" name="dest_folder" value="{{ dest_folder }}">
+        <input type="hidden" id="exam_to_delete" name="exam_to_delete" value="">
+
         <div class="tabs">
             <div class="tab" id="tabExamReqLoader" data-tab="divExamReqLoader">Carregar pedido médico</div>
             <div class="tab" id="tabExamReqManager" data-tab="divExamReqManager">Gerenciar pedido médico</div>
         </div>
 
         <div class="content" id="divExamReqLoader">
-            <h2 style="display: inline-block;">Carregar pedido médico</h2>
-            <br><br>
-            &nbsp;&nbsp;
+            <h2 style="display: inline-block;">Pedidos carregados e em processamento</h2>
+            <br>
             <input type="file" id="load_exam_req_file" accept="text/plain,application/pdf,image/jpeg,image/png" style="display: none;"></input>
-            <button type="submit" name="load_exam_btn" class="btn-load-style">Carregar</button>&nbsp;&nbsp;&nbsp;
-            <button type="submit" name="update_exams_btn" class="btn-general-style">Atualizar</button>&nbsp;&nbsp;&nbsp;
             {% if processsing_exams|length > 0 %}
-            <h2>Pedidos carregados e em processamento</h2>
             <div id="div_context_steps" class="form-list">
-                <table id="step_lst">
+                <table id="processing_lst">
                     <thead>
                         <tr>
                             <th>Data hora</th>
@@ -57,12 +55,53 @@
                     </tbody>
                 </table>
             </div>
+            <br>
             {% endif %}
+            <button type="submit" name="load_exam_btn" class="btn-load-style">Carregar</button>&nbsp;&nbsp;&nbsp;
+            <button type="submit" name="update_exams_btn" class="btn-general-style">Atualizar</button>
         </div>
      
         <div class="content" id="divExamReqManager">
-
-        </div>
+            <h2 style="display: inline-block;">Pedidos processados</h2>
+            <br>
+            <input type="file" id="load_exam_req_file" accept="text/plain,application/pdf,image/jpeg,image/png" style="display: none;"></input>
+            {% if processsed_exams|length > 0 %}
+            <div id="div_context_steps" class="form-list">
+                <table id="processed_lst">
+                    <thead>
+                        <tr>
+                            <th>Data hora</th>
+                            <th>Pedido</th>
+                            <th>Visualizar</th>
+                            <th>Baixar</th>
+                            <th>Remover</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for exam_date, exam_name  in processsed_exams %}
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;{{ exam_date }}&nbsp;&nbsp;&nbsp;</td>
+                            <td>&nbsp;&nbsp;&nbsp;{{ exam_name }}&nbsp;&nbsp;&nbsp;</td>
+                            <td style="text-align: center; height: 16px; width: 16px">
+                                <img class="delete-icon" src="static/visibility.png"
+                                    style="width: 20px; height: 20px; object-fit: cover;" value="{{ loop.index }}">
+                            </td>
+                            <td style="text-align: center; height: 16px; width: 16px">
+                                <img class="delete-icon" src="static/download.png"
+                                    style="width: 20px; height: 20px; object-fit: cover;" value="{{ loop.index }}">
+                            </td>
+                            <td style="text-align: center; height: 16px; width: 16px">
+                                <img class="delete-icon" src="static/trash-bin.png"
+                                    style="width: 20px; height: 20px; object-fit: cover;" value="{{ loop.index }}">
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            {% endif %}
+            <button type="submit" name="update_proc_exams_btn" class="btn-general-style">Atualizar</button>&nbsp;&nbsp;&nbsp;
     </form>
 
     <div id="loading_message_area" class="form-list" style="white-space: pre-wrap;">
@@ -154,6 +193,22 @@
             }
             this.submit();
         });
+
+        // Deleta um pedido de exame já processado
+        const processed_lst = document.getElementById("processed_lst");
+        if (processed_lst != null) {
+            processed_lst.addEventListener("click", function (event) {
+                console.log(event.target);
+                if (event.target.classList.contains("delete-icon")) {
+                    const exam_num = event.target.getAttribute("value");
+                    response = confirm("Tem certeza que deseja deletar o pedido de exame \"" + exam_num + "\"?");
+                    if (!response) return;
+                    clicked_button.value = "delete_exam_btn";
+                    document.getElementById("exam_to_delete").value = exam_num;
+                    form.submit();
+                }
+            });
+        }
     </script>
 </body>
 

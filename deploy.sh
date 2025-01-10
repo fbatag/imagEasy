@@ -31,8 +31,8 @@ gcloud storage buckets describe gs://$UPLOAD_BUCKET --format="default(cors_confi
 
 gcloud storage buckets create gs://$PROCESSED_BUCKET --location=$REGION
 #gcloud storage buckets update gs://PROCESSED_BUCKET --lifecycle-file=bucket_lifecycle.json
-gcloud storage buckets update gs://$PROCESSED_BUCKET --cors-file=bucket-cors.json
-gcloud storage buckets describe gs://$PROCESSED_BUCKET --format="default(cors_config)" # Verificar se acatou
+#gcloud storage buckets update gs://$PROCESSED_BUCKET --cors-file=bucket-cors.json
+#gcloud storage buckets describe gs://$PROCESSED_BUCKET --format="default(cors_config)" # Verificar se acatou
 
 gcloud iam service-accounts create $SERVICE_ACCOUNT \
 --display-name "ImagEasy Service Account" \

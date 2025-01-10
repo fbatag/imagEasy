@@ -4,8 +4,11 @@ from flask import Flask, request, render_template
 from imageasylib.utils import get_project_Id, get_iap_user, get_user_folder, get_user_files, getSignedUrlParam
 
 UPLOAD_BUCKET_NAME = os.environ.get("UPLOAD_BUCKET_NAME", "imageasy-upload-") + get_project_Id()
+PROCESSED_BUCKET_NAME = os.environ.get("PROCESSED_BUCKET_NAME", "imageasy-processed-") + get_project_Id() 
 
 print("(RE)LOADING APPLICATION")
+print(PROCESSED_BUCKET_NAME)
+
 app = Flask(__name__)
 timezone = None
 
@@ -44,21 +47,20 @@ def renderIndex(page="index.html"):
                            choosen_model_name=choosen_model_name,
                            dest_bucket=UPLOAD_BUCKET_NAME, 
                            dest_folder=get_user_folder(),
-                           processsing_exams = loadUserProcessingExams(),
+                           processsing_exams = loadUserExams(UPLOAD_BUCKET_NAME),
+                           processsed_exams = loadUserExams(PROCESSED_BUCKET_NAME)
                            )
     
-
-def loadUserProcessingExams():
-    print("METHOD: loadUserProcessingExams")
-    processsing_exams_blobs = get_user_files(UPLOAD_BUCKET_NAME)
-    processsing_exams = []
-    for blob in processsing_exams_blobs:
+def loadUserExams(bucket_name):
+    print("METHOD: loadUserExams:" + bucket_name)
+    exams_blobs = get_user_files(bucket_name)
+    exams = []
+    print(exams_blobs)
+    for blob in exams_blobs:
         parts = blob.name.split('/')
-        print("METHOD: CHECK_timezone: " + str(timezone))
         createDatetime = blob.time_created - datetime.timedelta(minutes=timezone)
-        processsing_exams.append((createDatetime.strftime("%Y-%m-%d %H:%M:%S"), parts[-1]))
-    return processsing_exams
-
+        exams.append((createDatetime.strftime("%Y-%m-%d %H:%M:%S"), parts[-1]))
+    return exams
 
 #@app.route('/set_timezone', methods=['GET'])
 def set_timezone():
