@@ -8,6 +8,7 @@ export SERVICE_ACCOUNT=$APP_NAME-sa
 
 export UPLOAD_BUCKET=$APP_NAME-upload-$PROJECT_ID
 export PROCESSED_BUCKET=$APP_NAME-processed-$PROJECT_ID
+export RESULT_BUCKET=$APP_NAME-result-$PROJECT_ID
 
 export DOMAIN=$APP_NAME.fbatagin.demo.altostrat.com
 export SERVICE_NAME_UI=$APP_NAME-ui
@@ -30,9 +31,7 @@ gcloud storage buckets update gs://$UPLOAD_BUCKET --cors-file=bucket-cors.json
 gcloud storage buckets describe gs://$UPLOAD_BUCKET --format="default(cors_config)" # Verificar se acatou
 
 gcloud storage buckets create gs://$PROCESSED_BUCKET --location=$REGION
-#gcloud storage buckets update gs://PROCESSED_BUCKET --lifecycle-file=bucket_lifecycle.json
-#gcloud storage buckets update gs://$PROCESSED_BUCKET --cors-file=bucket-cors.json
-#gcloud storage buckets describe gs://$PROCESSED_BUCKET --format="default(cors_config)" # Verificar se acatou
+gcloud storage buckets create gs://$RESULT_BUCKET --location=$REGION
 
 gcloud iam service-accounts create $SERVICE_ACCOUNT \
 --display-name "ImagEasy Service Account" \
@@ -43,6 +42,10 @@ gcloud storage buckets add-iam-policy-binding gs://$UPLOAD_BUCKET \
 --role=roles/storage.objectUser --project=$PROJECT_ID
 
 gcloud storage buckets add-iam-policy-binding gs://$PROCESSED_BUCKET \
+--member=serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com \
+--role=roles/storage.objectUser --project=$PROJECT_ID
+
+gcloud storage buckets add-iam-policy-binding gs://$RESULT_BUCKET \
 --member=serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com \
 --role=roles/storage.objectUser --project=$PROJECT_ID
 

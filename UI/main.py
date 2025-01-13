@@ -4,7 +4,7 @@ from flask import Flask, request, render_template
 from imageasylib.utils import get_project_Id, get_iap_user, get_user_folder, get_user_files, getSignedUrlParam
 
 UPLOAD_BUCKET_NAME = os.environ.get("UPLOAD_BUCKET_NAME", "imageasy-upload-") + get_project_Id()
-PROCESSED_BUCKET_NAME = os.environ.get("PROCESSED_BUCKET_NAME", "imageasy-processed-") + get_project_Id() 
+PROCESSED_BUCKET_NAME = os.environ.get("PROCESSED_BUCKET_NAME", "imageasy-processed-") + get_project_Id()
 
 print("(RE)LOADING APPLICATION")
 print(PROCESSED_BUCKET_NAME)
