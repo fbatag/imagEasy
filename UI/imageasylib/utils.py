@@ -1,10 +1,11 @@
-import datetime
+import  os, datetime
 from flask import request
 from google import auth
 from google.oauth2 import service_account
 from google.cloud import storage
 
 storage_client = storage.Client()
+local_cred_file = os.environ.get("HOME") +"/.config/gcloud/imageasy_sa.json"
 
 def get_project_Id():
     return storage_client.project
@@ -36,7 +37,7 @@ def getSignedUrlParam(dest_bucket_name, dest_object, filetype):
     if request.url_root == 'http://127.0.0.1:5000/':
         print("RUNNING LOCAL")
         signeUrl = blob.generate_signed_url(method='PUT', version="v4", expiration=expiration, content_type=filetype, 
-                                    credentials=service_account.Credentials.from_service_account_file("../../imageasysa.json"),
+                                    credentials=service_account.Credentials.from_service_account_file(local_cred_file),
                                     headers={"X-Goog-Content-Length-Range": "1,5000000000", 'Content-Type': filetype})
     else:
         print("CREDENTIALS")

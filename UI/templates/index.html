@@ -26,7 +26,7 @@
         <input type="hidden" id="clicked_button" name="clicked_button" value="">
         <input type="hidden" id="dest_bucket" name="dest_bucket" value="{{ dest_bucket }}">
         <input type="hidden" id="dest_folder" name="dest_folder" value="{{ dest_folder }}">
-        <input type="hidden" id="exam_to_delete" name="exam_to_delete" value="">
+        <input type="hidden" id="choose_exam" name="choose_exam" value="">
 
         <div class="tabs">
             <div class="tab" id="tabExamReqLoader" data-tab="divExamReqLoader">Carregar pedido médico</div>
@@ -65,7 +65,6 @@
         <div class="content" id="divExamReqManager">
             <h2 style="display: inline-block;">Pedidos processados</h2>
             <br>
-            <input type="file" id="load_exam_req_file" accept="text/plain,application/pdf,image/jpeg,image/png" style="display: none;"></input>
             {% if processsed_exams|length > 0 %}
             <div id="div_context_steps" class="form-list">
                 <table id="processed_lst">
@@ -84,11 +83,11 @@
                             <td>&nbsp;&nbsp;&nbsp;{{ exam_date }}&nbsp;&nbsp;&nbsp;</td>
                             <td>&nbsp;&nbsp;&nbsp;{{ exam_name }}&nbsp;&nbsp;&nbsp;</td>
                             <td style="text-align: center; height: 16px; width: 16px">
-                                <img class="delete-icon" src="static/visibility.png"
+                                <img class="view-icon" src="static/visibility.png"
                                     style="width: 20px; height: 20px; object-fit: cover;" value="{{ loop.index }}">
                             </td>
                             <td style="text-align: center; height: 16px; width: 16px">
-                                <img class="delete-icon" src="static/download.png"
+                                <img class="download-icon" src="static/download.png"
                                     style="width: 20px; height: 20px; object-fit: cover;" value="{{ loop.index }}">
                             </td>
                             <td style="text-align: center; height: 16px; width: 16px">
@@ -200,14 +199,21 @@
         if (processed_lst != null) {
             processed_lst.addEventListener("click", function (event) {
                 console.log(event.target);
-                if (event.target.classList.contains("delete-icon")) {
-                    const exam_num = event.target.getAttribute("value");
+                const exam_num = event.target.getAttribute("value");
+                document.getElementById("choose_exam").value = exam_num;
+                if (event.target.classList.contains("view-icon")) {
+                    clicked_button.value = "view_exam_btn";
+                    form.submit();
+                } else if (event.target.classList.contains("download-icon")) {
+                    clicked_button.value = "download_exam_btn";
+                    form.submit();
+                } else if (event.target.classList.contains("delete-icon")) {
                     response = confirm("Tem certeza que deseja deletar o pedido de exame \"" + exam_num + "\"?");
                     if (!response) return;
                     clicked_button.value = "delete_exam_btn";
-                    document.getElementById("exam_to_delete").value = exam_num;
                     form.submit();
                 }
+
             });
         }
     </script>

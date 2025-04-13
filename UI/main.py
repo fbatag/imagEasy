@@ -7,7 +7,6 @@ UPLOAD_BUCKET_NAME = os.environ.get("UPLOAD_BUCKET_NAME", "imageasy-upload-") + 
 PROCESSED_BUCKET_NAME = os.environ.get("PROCESSED_BUCKET_NAME", "imageasy-processed-") + get_project_Id()
 
 print("(RE)LOADING APPLICATION")
-print(PROCESSED_BUCKET_NAME)
 
 app = Flask(__name__)
 timezone = None
